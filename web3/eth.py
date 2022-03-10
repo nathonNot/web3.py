@@ -346,6 +346,7 @@ class BaseEth(Module):
 
 class AsyncEth(BaseEth):
     is_async = True
+    defaultContractFactory: Type[Union[Contract, ConciseContract, ContractCaller]] = Contract  # noqa: E704,E501
 
     @property
     async def accounts(self) -> Tuple[ChecksumAddress]:
@@ -550,6 +551,24 @@ class AsyncEth(BaseEth):
         state_override: Optional[CallOverrideParams] = None,
     ) -> Union[bytes, bytearray]:
         return await self._call(transaction, block_identifier, state_override)
+
+    @overload
+    def contract(self, address: None = None, **kwargs: Any) -> Type[Contract]: ...  # noqa: E704,E501
+
+    @overload  # noqa: F811
+    def contract(self, address: Union[Address, ChecksumAddress, ENS], **kwargs: Any) -> Contract: ...  # noqa: E704,E501
+
+    def contract(  # noqa: F811
+        self, address: Optional[Union[Address, ChecksumAddress, ENS]] = None, **kwargs: Any
+    ) -> Union[Type[Contract], Contract]:
+        ContractFactoryClass = kwargs.pop('ContractFactoryClass', self.defaultContractFactory)
+
+        ContractFactory = ContractFactoryClass.factory(self.web3, **kwargs)
+
+        if address:
+            return ContractFactory(address)
+        else:
+            return ContractFactory
 
 
 class Eth(BaseEth):
