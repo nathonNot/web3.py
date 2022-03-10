@@ -563,7 +563,7 @@ class AsyncEth(BaseEth):
     ) -> Union[Type[Contract], Contract]:
         ContractFactoryClass = kwargs.pop('ContractFactoryClass', self.defaultContractFactory)
 
-        ContractFactory = ContractFactoryClass.factory(self.web3, **kwargs)
+        ContractFactory = ContractFactoryClass.factory(self.w3, **kwargs)
 
         if address:
             return ContractFactory(address)

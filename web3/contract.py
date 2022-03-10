@@ -936,7 +936,7 @@ class ContractFunction:
         """
         if not self.w3.eth.is_async:
             raise ValueError(
-                "web3 eth mast use by AsyncEth"
+                "web3 eth mast use by AsyncEth Please call the call method"
             )
         call_transaction = self._get_call_transaction(transaction)
         block_id = parse_block_identifier(self.w3, block_identifier)
@@ -984,6 +984,10 @@ class ContractFunction:
         :return: ``Caller`` object that has contract public functions
             and variables exposed as Python methods
         """
+        if self.w3.eth.is_async:
+            raise ValueError(
+                "In an asynchronous call, use await sync_call"
+            )
         call_transaction: TxParams = self._get_call_transaction(transaction)
 
         block_id = parse_block_identifier(self.w3, block_identifier)
