@@ -908,10 +908,10 @@ class ContractFunction:
 
         if self.address:
             call_transaction.setdefault('to', self.address)
-        if self.web3.eth.default_account is not empty:
+        if self.w3.eth.default_account is not empty:
             # type ignored b/c check prevents an empty default_account
             call_transaction.setdefault(
-                'from', self.web3.eth.default_account)  # type: ignore
+                'from', self.w3.eth.default_account)  # type: ignore
 
         if 'to' not in call_transaction:
             if isinstance(self, type):
@@ -934,15 +934,15 @@ class ContractFunction:
         """
         async call function for function call
         """
-        if not self.web3.eth.is_async:
+        if not self.w3.eth.is_async:
             raise ValueError(
                 "web3 eth mast use by AsyncEth"
             )
         call_transaction = self._get_call_transaction(transaction)
-        block_id = parse_block_identifier(self.web3, block_identifier)
+        block_id = parse_block_identifier(self.w3, block_identifier)
 
         return await async_call_contract_function(
-            self.web3,
+            self.w3,
             self.address,
             self._return_data_normalizers,
             self.function_identifier,
@@ -986,10 +986,10 @@ class ContractFunction:
         """
         call_transaction: TxParams = self._get_call_transaction(transaction)
 
-        block_id = parse_block_identifier(self.web3, block_identifier)
+        block_id = parse_block_identifier(self.w3, block_identifier)
 
         return call_contract_function(
-            self.web3,
+            self.w3,
             self.address,
             self._return_data_normalizers,
             self.function_identifier,
@@ -1554,7 +1554,7 @@ def _decode_res_by_abi(
 
 
 async def async_call_contract_function(
-        web3: 'Web3',
+        w3: 'Web3',
         address: ChecksumAddress,
         normalizers: Tuple[Callable[..., Any], ...],
         function_identifier: FunctionIdentifier,
@@ -1571,7 +1571,7 @@ async def async_call_contract_function(
     """
     call_transaction = prepare_transaction(
         address,
-        web3,
+        w3,
         fn_identifier=function_identifier,
         contract_abi=contract_abi,
         fn_abi=fn_abi,
@@ -1580,14 +1580,14 @@ async def async_call_contract_function(
         fn_kwargs=kwargs,
     )
 
-    return_data = await web3.eth.call(
+    return_data = await w3.eth.call(
         call_transaction,
         block_identifier=block_id,
         state_override=state_override,
     )
 
     return _decode_res_by_abi(
-        return_data, web3,
+        return_data, w3,
         address, normalizers,
         function_identifier,
         contract_abi, fn_abi,
@@ -1595,7 +1595,7 @@ async def async_call_contract_function(
 
 
 def call_contract_function(
-        web3: 'Web3',
+        w3: 'Web3',
         address: ChecksumAddress,
         normalizers: Tuple[Callable[..., Any], ...],
         function_identifier: FunctionIdentifier,
@@ -1612,7 +1612,7 @@ def call_contract_function(
     """
     call_transaction = prepare_transaction(
         address,
-        web3,
+        w3,
         fn_identifier=function_identifier,
         contract_abi=contract_abi,
         fn_abi=fn_abi,
@@ -1621,14 +1621,14 @@ def call_contract_function(
         fn_kwargs=kwargs,
     )
 
-    return_data = web3.eth.call(
+    return_data = w3.eth.call(
         call_transaction,
         block_identifier=block_id,
         state_override=state_override,
     )
     
     return _decode_res_by_abi(
-        return_data, web3,
+        return_data, w3,
         address, normalizers,
         function_identifier,
         contract_abi, fn_abi,
